@@ -1,5 +1,3 @@
-
-# Cargar librerías y datos:
 # Librerías
 library(tidyverse)
 library(cluster)
@@ -13,15 +11,17 @@ library(lubridate)
 # Cargar el Dataset
 dataset_path <- file.choose()
 df <- fread(dataset_path)
-selected_df <- df[, c("InvoiceNo", "StockCode", "Description", "Quantity", "InvoiceDate", "UnitPrice", "CustomerID", "Country")]
 
+# Selección
+selected_df <- df[, c("InvoiceNo", "StockCode", "Description", "Quantity", "InvoiceDate", "UnitPrice", "CustomerID", "Country")]
 
 
 # Eliminar NA y devoluciones
 df_clean <- na.omit(selected_df)
 df_clean <- df_clean[df_clean$Quantity > 0 & df_clean$UnitPrice > 0, ]
 
-# Convertir la columna de fecha
+
+# Transformación
 df_clean$InvoiceDate <- as.POSIXct(df_clean$InvoiceDate, format="%Y-%m-%d %H:%M:%S")
 df_clean$Month <- format(df_clean$InvoiceDate, "%m")
 
@@ -36,13 +36,13 @@ customer_data <- df_clean %>%
             AvgPurchase = mean(TotalPrice))
 
 
-# Minería de datos
+# Minería de Datos
 customer_scaled <- scale(customer_data[, -1])
 set.seed(123)
 kmeans_model <- kmeans(customer_scaled, centers = 4)
 customer_data$Segment <- kmeans_model$cluster
 
-# Visualización
+# Evaluación e Interpretación
 library(ggplot2)
 ggplot(customer_data, aes(x=TotalSpent, y=NumPurchases, color=factor(Segment))) +
   geom_point() +
